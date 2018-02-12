@@ -12,8 +12,6 @@
         <attr name="mediumLineEvery" format="integer" />
         <attr name="bigLineEvery" format="integer" />
 
-        <attr name="currentValue" format="float" />
-
         <attr name="smallLineLength" format="dimension" />
         <attr name="mediumLineLength" format="dimension" />
         <attr name="bigLineLength" format="dimension" />

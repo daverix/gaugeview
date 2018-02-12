@@ -14,9 +14,5 @@
         app:negativeNumberColor="#446688"
         app:mediumLineStrokeWidth="3dp"
 
-        app:startValue="-30"
-        app:endValue="50"
-        app:value="7"
-        app:numberSize="24sp"
-        app:showNumberEvery="10" />
+        app:numberSize="24sp" />
 </FrameLayout>

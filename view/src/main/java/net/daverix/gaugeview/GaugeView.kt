@@ -24,58 +24,17 @@ import kotlin.math.absoluteValue
 
 
 class GaugeView : View {
-    private val smallLinePaint = Paint().apply {
+    private val linePaint = Paint().apply {
         color = Color.DKGRAY
         style = Paint.Style.STROKE
-        strokeWidth = 4f
     }
-    private val negativeSmallLinePaint = Paint().apply {
-        color = smallLinePaint.color
-        style = Paint.Style.STROKE
-        strokeWidth = smallLinePaint.strokeWidth
-    }
-
-    private val mediumLinePaint = Paint().apply {
-        color = Color.DKGRAY
-        style = Paint.Style.STROKE
-        strokeWidth = 4f
-    }
-    private val negativeMediumLinePaint = Paint().apply {
-        color = mediumLinePaint.color
-        style = Paint.Style.STROKE
-        strokeWidth = mediumLinePaint.strokeWidth
-    }
-
-    private val bigLinePaint = Paint().apply {
-        color = Color.DKGRAY
-        style = Paint.Style.STROKE
-        strokeWidth = 8f
-    }
-    private val negativeBigLinePaint = Paint().apply {
-        color = bigLinePaint.color
-        style = Paint.Style.STROKE
-        strokeWidth = bigLinePaint.strokeWidth
-    }
-
     private val numberPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
         style = Paint.Style.FILL
-        textSize = 64f
         textAlign = Paint.Align.CENTER
     }
-    private val negativeNumberPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = numberPaint.color
-        style = Paint.Style.FILL
-        textSize = numberPaint.textSize
-        textAlign = Paint.Align.CENTER
-    }
-
     private val pointerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.RED
-        style = Paint.Style.FILL
-    }
-    private val pointerCenterPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
         style = Paint.Style.FILL
     }
 
@@ -111,71 +70,70 @@ class GaugeView : View {
     var showNumberEvery: Int = 10
     var degrees: Int = 270
     var gaugeRotation: Float = -90f
+
+    var numberSize: Float = 48f
+    var smallLineStrokeWidth: Float = 4f
+    var mediumLineStrokeWidth: Float = 6f
+    var bigLineStrokeWidth: Float = 8f
+
     var pointerColor: Int = Color.RED
+
+    var numberColor: Int = Color.BLACK
+    var smallLineColor: Int = Color.DKGRAY
+    var mediumLineColor: Int = Color.DKGRAY
+    var bigLineColor: Int = Color.DKGRAY
+
+    var negativeNumberColor: Int = Color.BLUE
+    var negativeSmallLineColor: Int = Color.BLUE
+    var negativeMediumLineColor: Int = Color.BLUE
+    var negativeBigLineColor: Int = Color.BLUE
 
     constructor(context: Context) : this(context, null)
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
-            : super(context, attrs, defStyleAttr) {
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
 
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int)
+            : super(context, attrs, defStyleAttr) {
         val arr = context.theme.obtainStyledAttributes(
                 attrs,
                 R.styleable.GaugeView,
-                0, 0)
+                defStyleAttr,
+                defStyleRes)
         try {
-            pointerColor = arr.getInt(R.styleable.GaugeView_pointerColor, pointerColor)
-            startValue = arr.getInt(R.styleable.GaugeView_startValue, startValue)
-            endValue = arr.getInt(R.styleable.GaugeView_endValue, endValue)
-            value = arr.getFloat(R.styleable.GaugeView_value, value)
-            showNumberEvery = arr.getInt(R.styleable.GaugeView_showNumberEvery, showNumberEvery)
-            degrees = arr.getInt(R.styleable.GaugeView_arc, degrees)
-            gaugeRotation = arr.getFloat(R.styleable.GaugeView_rotation, gaugeRotation)
+            arr.apply {
+                pointerColor = getInt(R.styleable.GaugeView_pointerColor, pointerColor)
+                startValue = getInt(R.styleable.GaugeView_startValue, startValue)
+                endValue = getInt(R.styleable.GaugeView_endValue, endValue)
+                value = getFloat(R.styleable.GaugeView_value, value)
+                showNumberEvery = getInt(R.styleable.GaugeView_showNumberEvery, showNumberEvery)
+                degrees = getInt(R.styleable.GaugeView_arc, degrees)
+                gaugeRotation = getFloat(R.styleable.GaugeView_rotation, gaugeRotation)
 
+                smallLineLength = getDimension(R.styleable.GaugeView_smallLineLength, smallLineLength)
+                mediumLineLength = getDimension(R.styleable.GaugeView_mediumLineLength, mediumLineLength)
+                bigLineLength = getDimension(R.styleable.GaugeView_mediumLineLength, bigLineLength)
 
-            smallLineLength = arr.getDimension(R.styleable.GaugeView_smallLineLength, smallLineLength)
-            mediumLineLength = arr.getDimension(R.styleable.GaugeView_mediumLineLength, mediumLineLength)
-            bigLineLength = arr.getDimension(R.styleable.GaugeView_mediumLineLength, bigLineLength)
+                smallLineEvery = getInt(R.styleable.GaugeView_smallLineEvery, smallLineEvery)
+                mediumLineEvery = getInt(R.styleable.GaugeView_mediumLineEvery, mediumLineEvery)
+                bigLineEvery = getInt(R.styleable.GaugeView_bigLineEvery, bigLineEvery)
 
-            smallLineEvery = arr.getInt(R.styleable.GaugeView_smallLineEvery, smallLineEvery)
-            mediumLineEvery = arr.getInt(R.styleable.GaugeView_mediumLineEvery, mediumLineEvery)
-            bigLineEvery = arr.getInt(R.styleable.GaugeView_bigLineEvery, bigLineEvery)
+                numberColor = getColor(R.styleable.GaugeView_numberColor, numberColor)
+                negativeNumberColor = getColor(R.styleable.GaugeView_negativeNumberColor, negativeNumberColor)
+                numberSize = getDimension(R.styleable.GaugeView_numberSize, numberSize)
 
-            numberPaint.apply {
-                textSize = arr.getDimension(R.styleable.GaugeView_numberSize, textSize)
-                color = arr.getColor(R.styleable.GaugeView_numberColor, color)
-            }
-            negativeNumberPaint.apply {
-                textSize = numberPaint.textSize
-                color = arr.getColor(R.styleable.GaugeView_negativeNumberColor, color)
-            }
+                smallLineColor = getColor(R.styleable.GaugeView_smallLineColor, smallLineColor)
+                negativeSmallLineColor = getColor(R.styleable.GaugeView_negativeSmallLineColor, negativeSmallLineColor)
+                smallLineStrokeWidth = getDimension(R.styleable.GaugeView_smallLineStrokeWidth, smallLineStrokeWidth)
 
-            smallLinePaint.apply {
-                color = arr.getColor(R.styleable.GaugeView_smallLineColor, color)
-                strokeWidth = arr.getDimension(R.styleable.GaugeView_smallLineStrokeWidth, strokeWidth)
-            }
-            negativeSmallLinePaint.apply {
-                color = arr.getColor(R.styleable.GaugeView_negativeSmallLineColor, color)
-                strokeWidth = smallLinePaint.strokeWidth
-            }
+                mediumLineColor = getColor(R.styleable.GaugeView_mediumLineColor, mediumLineColor)
+                negativeMediumLineColor = getColor(R.styleable.GaugeView_negativeMediumLineColor, negativeMediumLineColor)
+                mediumLineStrokeWidth = getDimension(R.styleable.GaugeView_mediumLineStrokeWidth, mediumLineStrokeWidth)
 
-            mediumLinePaint.apply {
-                color = arr.getColor(R.styleable.GaugeView_mediumLineColor, color)
-                strokeWidth = arr.getDimension(R.styleable.GaugeView_mediumLineStrokeWidth, strokeWidth)
-            }
-            negativeMediumLinePaint.apply {
-                color = arr.getColor(R.styleable.GaugeView_negativeMediumLineColor, color)
-                strokeWidth = mediumLinePaint.strokeWidth
-            }
-
-            bigLinePaint.apply {
-                color = arr.getColor(R.styleable.GaugeView_bigLineColor, color)
-                strokeWidth = arr.getDimension(R.styleable.GaugeView_bigLineStrokeWidth, strokeWidth)
-            }
-            negativeBigLinePaint.apply {
-                color = arr.getColor(R.styleable.GaugeView_negativeBigLineColor, color)
-                strokeWidth = bigLinePaint.strokeWidth
+                bigLineColor = getColor(R.styleable.GaugeView_bigLineColor, bigLineColor)
+                negativeBigLineColor = getColor(R.styleable.GaugeView_negativeBigLineColor, negativeBigLineColor)
+                bigLineStrokeWidth = getDimension(R.styleable.GaugeView_bigLineStrokeWidth, bigLineStrokeWidth)
             }
         } finally {
             arr.recycle()
@@ -199,25 +157,37 @@ class GaugeView : View {
         val pointerRadiusBottom = 16f
         val pointerRadiusCenter = 32f
 
-        pointerPath = Path().apply {
-            addOval(RectF(-pointerRadiusCenter,
-                    -pointerRadiusCenter,
-                    pointerRadiusCenter,
-                    pointerRadiusCenter), Path.Direction.CW)
+        pointerPath = createPointerPath(pointerRadiusCenter,
+                pointerRadiusTop,
+                pointerTop,
+                pointerRadiusBottom,
+                pointerBottom)
+        pointerCenterPath = createPointerCenterPath(pointerRadiusBottom)
+    }
 
-            moveTo(-pointerRadiusTop, -pointerTop)
-            lineTo(0f, -pointerTop - pointerRadiusTop)
-            lineTo(pointerRadiusTop, -pointerTop)
-            lineTo(pointerRadiusBottom, pointerBottom)
-            lineTo(-pointerRadiusBottom, pointerBottom)
-            lineTo(-pointerRadiusTop, -pointerTop)
-        }
-        pointerCenterPath = Path().apply {
-            addOval(RectF(-pointerRadiusBottom,
-                    -pointerRadiusBottom,
-                    pointerRadiusBottom,
-                    pointerRadiusBottom), Path.Direction.CW)
-        }
+    private fun createPointerCenterPath(pointerRadiusBottom: Float) = Path().apply {
+        addOval(RectF(-pointerRadiusBottom,
+                -pointerRadiusBottom,
+                pointerRadiusBottom,
+                pointerRadiusBottom), Path.Direction.CW)
+    }
+
+    private fun createPointerPath(pointerRadiusCenter: Float,
+                                  pointerRadiusTop: Float,
+                                  pointerTop: Float,
+                                  pointerRadiusBottom: Float,
+                                  pointerBottom: Float) = Path().apply {
+        addOval(RectF(-pointerRadiusCenter,
+                -pointerRadiusCenter,
+                pointerRadiusCenter,
+                pointerRadiusCenter), Path.Direction.CW)
+
+        moveTo(-pointerRadiusTop, -pointerTop)
+        lineTo(0f, -pointerTop - pointerRadiusTop)
+        lineTo(pointerRadiusTop, -pointerTop)
+        lineTo(pointerRadiusBottom, pointerBottom)
+        lineTo(-pointerRadiusBottom, pointerBottom)
+        lineTo(-pointerRadiusTop, -pointerTop)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -244,60 +214,81 @@ class GaugeView : View {
         drawLines(canvas, lineEndX, degreesPerStep)
         drawNumbers(canvas, lineEndX, degreesPerStep)
         drawPointer(canvas, degreesPerStep)
+
+        if (startValue < 0) {
+            drawIndicators(degreesPerStep, canvas, lineEndX)
+        }
     }
 
     private fun drawPointer(canvas: Canvas, degreesPerStep: Float) {
         val angle = getAngleFromValue(value, degreesPerStep)
 
-        pointerPaint.color = pointerColor
-
         canvas.withSave {
             rotate(angle, pivotX, pivotY)
             translate(pivotX, pivotY)
+
+            pointerPaint.color = pointerColor
             drawPath(pointerPath, pointerPaint)
-            drawPath(pointerCenterPath, pointerCenterPaint)
+
+            pointerPaint.color = Color.WHITE
+            drawPath(pointerCenterPath, pointerPaint)
         }
     }
 
     private fun drawNumbers(canvas: Canvas, lineEndX: Float, degreesPerStep: Float) {
-        for (i in startValue..endValue) {
-            if (i % showNumberEvery == 0) {
-                val angle = getAngleFromValue(i.toFloat(), degreesPerStep)
-                val numberText = i.absoluteValue.toString()
+        numberPaint.textSize = numberSize
 
-                val textPaint = if (i <= 0) negativeNumberPaint else numberPaint
-                drawText(angle, canvas, numberText, lineEndX, textPaint)
-            }
-        }
+        for (i in startValue..endValue step showNumberEvery) {
+            val angle = getAngleFromValue(i.toFloat(), degreesPerStep)
+            val numberText = i.absoluteValue.toString()
 
-        if(startValue < 0) {
-            val halfDegrees = (degrees / 2f)
-            val indicatorSpacing = 5 * smallLineEvery * degreesPerStep
-            drawIndicator(-halfDegrees - indicatorSpacing, canvas, "-", lineEndX)
-            drawIndicator(halfDegrees + indicatorSpacing, canvas, "+", lineEndX)
+            numberPaint.color = if (i <= 0) negativeNumberColor else numberColor
+            drawNumber(angle, canvas, numberText, lineEndX)
         }
+    }
+
+    private fun drawIndicators(degreesPerStep: Float, canvas: Canvas, lineEndX: Float) {
+        val halfDegrees = (degrees / 2f)
+        val indicatorSpacing = 5 * smallLineEvery * degreesPerStep
+        drawIndicator(-halfDegrees - indicatorSpacing, canvas, "-", lineEndX)
+        drawIndicator(halfDegrees + indicatorSpacing, canvas, "+", lineEndX)
     }
 
     private fun drawLines(canvas: Canvas, lineEndX: Float, degreesPerStep: Float) {
         for (i in startValue..endValue step smallLineEvery) {
             val angle = getAngleFromValue(i.toFloat(), degreesPerStep)
 
-            val lineLength = when {
-                i % bigLineEvery == 0 -> bigLineLength
-                i % mediumLineEvery == 0 -> mediumLineLength
-                else -> smallLineLength
-            }
+            linePaint.color = getLineColor(i)
+            linePaint.strokeWidth = getLineStrokeWidth(i)
 
-            val linePaint = when {
-                i % bigLineEvery == 0 && i <= 0 -> negativeBigLinePaint
-                i % bigLineEvery == 0 -> bigLinePaint
-                i % mediumLineEvery == 0 && i <= 0 -> negativeMediumLinePaint
-                i % mediumLineEvery == 0 -> mediumLinePaint
-                i <= 0 -> negativeSmallLinePaint
-                else -> smallLinePaint
-            }
+            drawLine(angle, canvas, lineEndX, getLineLength(i))
+        }
+    }
 
-            drawLine(angle, canvas, lineEndX, lineLength, linePaint)
+    private fun getLineStrokeWidth(value: Int): Float {
+        return when {
+            value % bigLineEvery == 0 -> bigLineStrokeWidth
+            value % mediumLineEvery == 0 -> mediumLineStrokeWidth
+            else -> smallLineStrokeWidth
+        }
+    }
+
+    private fun getLineColor(value: Int): Int {
+        return when {
+            value % bigLineEvery == 0 && value <= 0 -> negativeBigLineColor
+            value % bigLineEvery == 0 -> bigLineColor
+            value % mediumLineEvery == 0 && value <= 0 -> negativeMediumLineColor
+            value % mediumLineEvery == 0 -> mediumLineColor
+            value <= 0 -> negativeSmallLineColor
+            else -> smallLineColor
+        }
+    }
+
+    private fun getLineLength(value: Int): Float {
+        return when {
+            value % bigLineEvery == 0 -> bigLineLength
+            value % mediumLineEvery == 0 -> mediumLineLength
+            else -> smallLineLength
         }
     }
 
@@ -305,19 +296,18 @@ class GaugeView : View {
         return -(degrees / 2f) + degreesPerStep * (value - startValue)
     }
 
-    private fun drawText(angle: Float,
-                         canvas: Canvas,
-                         numberText: String,
-                         lineEndX: Float,
-                         paint: Paint) {
+    private fun drawNumber(angle: Float,
+                           canvas: Canvas,
+                           numberText: String,
+                           lineEndX: Float) {
         val localRotation = clampDegrees(gaugeRotation + angle)
 
         canvas.withSave {
             rotate(localRotation, pivotX, pivotY)
-            val textWidth = paint.measureText(numberText)
+            val textWidth = numberPaint.measureText(numberText)
             translate(lineEndX - bigLineLength - textWidth / 2 - 16, pivotY)
             rotate(-localRotation)
-            drawText(numberText, 0f, paint.textSize / 2, paint)
+            drawText(numberText, 0f, numberSize / 2, numberPaint)
         }
     }
 
@@ -336,8 +326,7 @@ class GaugeView : View {
     private fun drawLine(rotation: Float,
                          canvas: Canvas,
                          lineEndX: Float,
-                         lineLength: Float,
-                         linePaint: Paint) {
+                         lineLength: Float) {
         canvas.withSave {
             rotate(clampDegrees(gaugeRotation + rotation), pivotX, pivotY)
             drawLine(lineEndX - lineLength, pivotY, lineEndX, pivotY, linePaint)

@@ -1,7 +1,7 @@
 # gaugeview
 A configurable gauge widget
 
-![vanilla configuration](https://github.com/daverix/gaugeview/raw/assets/screenshot.png)
+![sample configuration](https://github.com/daverix/gaugeview/raw/master/assets/screenshot.png)
 
 ## Configuration
 

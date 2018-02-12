@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="GaugeView">
+        <attr name="pointerColor" format="color" />
+        <attr name="arc" format="integer" />
+        <attr name="rotation" format="float" />
+        <attr name="startValue" format="integer" />
+        <attr name="endValue" format="integer" />
+        <attr name="value" format="float" />
+        <attr name="showNumberEvery" format="integer" />
+        <attr name="smallLineEvery" format="integer" />
+        <attr name="mediumLineEvery" format="integer" />
+        <attr name="bigLineEvery" format="integer" />
+
+        <attr name="currentValue" format="float" />
+
+        <attr name="smallLineLength" format="dimension" />
+        <attr name="mediumLineLength" format="dimension" />
+        <attr name="bigLineLength" format="dimension" />
+
+        <attr name="smallLineStrokeWidth" format="dimension" />
+        <attr name="mediumLineStrokeWidth" format="dimension" />
+        <attr name="bigLineStrokeWidth" format="dimension" />
+
+        <attr name="numberSize" format="dimension" />
+        <attr name="numberColor" format="color" />
+        <attr name="negativeNumberColor" format="color" />
+
+        <attr name="smallLineColor" format="color" />
+        <attr name="mediumLineColor" format="color" />
+        <attr name="bigLineColor" format="color" />
+
+        <attr name="negativeSmallLineColor" format="color" />
+        <attr name="negativeMediumLineColor" format="color" />
+        <attr name="negativeBigLineColor" format="color" />
+
+    </declare-styleable>
+</resources>

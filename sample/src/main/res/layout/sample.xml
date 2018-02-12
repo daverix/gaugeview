@@ -1,0 +1,22 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <net.daverix.gaugeview.GaugeView
+        android:id="@+id/gaugeView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        app:negativeSmallLineColor="#446688"
+        app:negativeMediumLineColor="#446688"
+        app:negativeBigLineColor="#446688"
+        app:negativeNumberColor="#446688"
+        app:mediumLineStrokeWidth="3dp"
+
+        app:startValue="-30"
+        app:endValue="50"
+        app:value="7"
+        app:numberSize="24sp"
+        app:showNumberEvery="10" />
+</FrameLayout>

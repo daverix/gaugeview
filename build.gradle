@@ -21,6 +21,7 @@ allprojects {
         jcenter()
     }
 
+    group = 'net.daverix.gaugeview'
     version = '0.1'
 }
 

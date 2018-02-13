@@ -35,7 +35,16 @@ A configurable gauge widget
 
 ## Usage
 
-Will upload to jcenter soon!
+Add the following to your build.gradle file:
+```
+dependencies {
+    implementation 'net.daverix.gaugeview:view:0.1'
+}
+
+repositories {
+    jcenter()
+}
+```
 
 Check the sample for how to apply the attributes above. All attributes above can be changed during 
 runtime with the corresponding properties on the view object.

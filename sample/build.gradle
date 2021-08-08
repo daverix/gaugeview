@@ -1,18 +1,14 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
 
-apply plugin: 'kotlin-android-extensions'
-
 android {
-    compileSdkVersion 27
+    compileSdkVersion 31
     defaultConfig {
         applicationId "net.daverix.gaugeview.sample"
         minSdkVersion 19
-        targetSdkVersion 27
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -25,10 +21,6 @@ android {
 dependencies {
     implementation project(':view')
 
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:27.0.2'
-
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.3.1'
 }

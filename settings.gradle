@@ -1,1 +1,1 @@
-include ':view',':sample'
+include(':view',':sample')

@@ -19,9 +19,8 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
-import androidx.graphics.withSave
+import androidx.core.graphics.withSave
 import kotlin.math.absoluteValue
-
 
 class GaugeView : View {
     private val linePaint = Paint().apply {
@@ -228,10 +227,10 @@ class GaugeView : View {
             translate(pivotX, pivotY)
 
             pointerPaint.color = pointerColor
-            drawPath(pointerPath, pointerPaint)
+            drawPath(pointerPath!!, pointerPaint)
 
             pointerPaint.color = Color.WHITE
-            drawPath(pointerCenterPath, pointerPaint)
+            drawPath(pointerCenterPath!!, pointerPaint)
         }
     }
 

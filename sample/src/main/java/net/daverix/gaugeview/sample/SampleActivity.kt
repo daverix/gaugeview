@@ -20,8 +20,8 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.animation.DecelerateInterpolator
+import androidx.appcompat.app.AppCompatActivity
 import net.daverix.gaugeview.GaugeView
 
 class SampleActivity : AppCompatActivity() {

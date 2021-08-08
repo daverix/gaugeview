@@ -35,15 +35,22 @@ A configurable gauge widget
 
 ## Usage
 
-Add the following to your build.gradle file:
+Will upload to mavenCentral if someone is interested.
+
+Meanwhile, add the following to your build.gradle file:
 ```
 dependencies {
     implementation 'net.daverix.gaugeview:view:0.1'
 }
 
 repositories {
-    jcenter()
+    mavenLocal()
 }
+```
+
+And then checkout and run the following to publish the library to your local maven:
+```
+./gradlew publishToMavenLocal
 ```
 
 Check the sample for how to apply the attributes above. All attributes above can be changed during 
@@ -51,7 +58,7 @@ runtime with the corresponding properties on the view object.
 
 ## License
 
-    Copyright 2018 David Laurell
+    Copyright 2020 David Laurell
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

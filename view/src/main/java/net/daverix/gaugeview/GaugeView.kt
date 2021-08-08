@@ -23,7 +23,7 @@ import androidx.core.graphics.withSave
 import kotlin.math.absoluteValue
 
 class GaugeView : View {
-    private val linePaint = Paint().apply {
+    private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.DKGRAY
         style = Paint.Style.STROKE
     }
@@ -227,10 +227,10 @@ class GaugeView : View {
             translate(pivotX, pivotY)
 
             pointerPaint.color = pointerColor
-            drawPath(pointerPath!!, pointerPaint)
+            pointerPath?.let { drawPath(it, pointerPaint) }
 
             pointerPaint.color = Color.WHITE
-            drawPath(pointerCenterPath!!, pointerPaint)
+            pointerCenterPath?.let { drawPath(it, pointerPaint) }
         }
     }
 

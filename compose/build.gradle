@@ -8,23 +8,31 @@ android {
     compileSdk 31
 
     defaultConfig {
-        minSdk 19
+        minSdk 21
         targetSdk 31
     }
-
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion compose_version
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     kotlinOptions {
         jvmTarget = '1.8'
     }
 }
 
 dependencies {
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    api 'androidx.core:core-ktx:1.6.0'
+    api project(':view')
+    api "androidx.compose.ui:ui:$compose_version"
+    implementation "androidx.compose.foundation:foundation:$compose_version"
+    implementation "androidx.compose.ui:ui-tooling:$compose_version"
+    implementation "androidx.savedstate:savedstate-ktx:1.1.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
 }
 
 task sourceJar(type: Jar) {
@@ -41,7 +49,7 @@ afterEvaluate {
                 artifact sourceJar
 
                 pom.withXml {
-                    asNode().appendNode('description', 'A library that provides a gauge view for use in android projects')
+                    asNode().appendNode('description', 'Compatibility library for using GaugeView in Jetpack Compose')
                 }
             }
         }

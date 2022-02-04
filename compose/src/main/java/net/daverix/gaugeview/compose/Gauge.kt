@@ -24,12 +24,11 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.absoluteValue
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.math.tan
 
 @Preview(
     showBackground = true,
-    widthDp = 300,
-    heightDp = 300
+    widthDp = 400,
+    heightDp = 400
 )
 @Composable
 private fun GaugePreview() {
@@ -63,10 +62,12 @@ fun Gauge(
     degrees: Int = 270,
     gaugeRotation: Float = -90f,
 
-    numberSize: TextUnit = 24.sp,
     smallLineStrokeWidth: Dp = 2.dp,
     mediumLineStrokeWidth: Dp = 3.dp,
     bigLineStrokeWidth: Dp = 4.dp,
+
+    numberSize: TextUnit = 24.sp,
+    numberPadding: Dp = bigLineLength / 4f,
 
     pointerColor: Color = Color.Red,
 
@@ -107,37 +108,21 @@ fun Gauge(
             smallLineStrokeWidth = smallLineStrokeWidth
         )
 
-        for (currentValue in startValue..endValue step showNumberEvery) {
-            BasicText(
-                text = currentValue.absoluteValue.toString(),
-                style = TextStyle(
-                    color = if (currentValue <= 0) negativeNumberColor else numberColor,
-                    fontSize = numberSize
-                ),
-                modifier = Modifier.layout { measurable, constraints ->
-                    val placeable = measurable.measure(constraints)
-
-                    val angle = getAngleFromValue(
-                        value = currentValue.toFloat(),
-                        degreesPerStep = degreesPerStep,
-                        degrees = degrees,
-                        startValue = startValue
-                    )
-                    val bigLineLengthInPx = bigLineLength.toPx()
-                    val widthInPx = maxWidth.toPx()
-                    val heightInPx = maxHeight.toPx()
-                    val halfWidth = widthInPx / 2f
-                    val halfHeight = heightInPx / 2f
-                    val a = gaugeRotation + angle
-                    val x = halfWidth - placeable.width / 2f - sin(a) * (halfWidth - bigLineLengthInPx*2)
-                    val y = halfHeight - placeable.height / 2f - cos(a) * (halfHeight - bigLineLengthInPx*2)
-
-                    layout(placeable.width, placeable.height) {
-                        placeable.place(x.toInt(), y.toInt())
-                    }
-                }
-            )
-        }
+        DrawNumbers(
+            startValue = startValue,
+            endValue = endValue,
+            showNumberEvery = showNumberEvery,
+            negativeNumberColor = negativeNumberColor,
+            numberColor = numberColor,
+            numberSize = numberSize,
+            numberPadding = numberPadding,
+            degreesPerStep = degreesPerStep,
+            degrees = degrees,
+            bigLineLength = bigLineLength,
+            gaugeRotation = gaugeRotation,
+            maxWidth = maxWidth,
+            maxHeight = maxHeight
+        )
 
         DrawPointer(
             degreesPerStep = degreesPerStep,
@@ -146,6 +131,55 @@ fun Gauge(
             pointerColor = pointerColor,
             startValue = startValue,
             degrees = degrees
+        )
+    }
+}
+
+@Composable
+private fun DrawNumbers(
+    startValue: Int,
+    endValue: Int,
+    showNumberEvery: Int,
+    negativeNumberColor: Color,
+    numberColor: Color,
+    numberSize: TextUnit,
+    degreesPerStep: Float,
+    degrees: Int,
+    bigLineLength: Dp,
+    gaugeRotation: Float,
+    numberPadding: Dp,
+    maxWidth: Dp,
+    maxHeight: Dp
+) {
+    for (currentValue in startValue..endValue step showNumberEvery) {
+        BasicText(
+            text = currentValue.absoluteValue.toString(),
+            style = TextStyle(
+                color = if (currentValue <= 0) negativeNumberColor else numberColor,
+                fontSize = numberSize
+            ),
+            modifier = Modifier.layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+
+                val angle = getAngleFromValue(
+                    value = currentValue.toFloat(),
+                    degreesPerStep = degreesPerStep,
+                    degrees = degrees,
+                    startValue = startValue
+                )
+                val a = (angle - gaugeRotation) * Math.PI / 180
+                val radius = maxOf(maxWidth, maxHeight).toPx() / 2f -
+                        bigLineLength.toPx() -
+                        numberPadding.toPx() -
+                        placeable.measuredHeight / 2f
+
+                val x = maxWidth.toPx() / 2f - placeable.measuredWidth / 2f - cos(a) * radius
+                val y = maxHeight.toPx() / 2f - placeable.measuredHeight / 2f - sin(a) * radius
+
+                layout(placeable.width, placeable.height) {
+                    placeable.place(x.toInt(), y.toInt())
+                }
+            }
         )
     }
 }
@@ -226,11 +260,12 @@ private fun DrawPointer(
     startValue: Int
 ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
+        val pointerHeight = maxOf(size.height, size.width)
         val pointerRadiusCenter = 16.dp.toPx()
         val pointerRadiusTop = 2.dp.toPx()
-        val pointerTop = size.height / 2 - mediumLineLength.toPx() - 4.dp.toPx()
+        val pointerTop = pointerHeight / 2 - mediumLineLength.toPx() - 4.dp.toPx()
         val pointerRadiusBottom = 8.dp.toPx()
-        val pointerBottom = size.height / 4
+        val pointerBottom = pointerHeight / 4
 
         val pointerMiddle = Path().apply {
             addOval(

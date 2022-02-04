@@ -79,7 +79,13 @@ fun Gauge(
     negativeNumberColor: Color = Color.Blue,
     negativeSmallLineColor: Color = Color.Blue,
     negativeMediumLineColor: Color = Color.Blue,
-    negativeBigLineColor: Color = Color.Blue
+    negativeBigLineColor: Color = Color.Blue,
+
+    displayIndicators: Boolean = startValue < 0,
+    negativeIndicatorColor: Color = Color.Black,
+    positiveIndicatorColor: Color = Color.Black,
+    indicatorSize: TextUnit = numberSize,
+    indicatorPadding: Dp = 4.dp
 ) {
     val values = (endValue - startValue) / 2
     val degreesPerStep = (degrees / 2f) / values
@@ -121,7 +127,12 @@ fun Gauge(
             bigLineLength = bigLineLength,
             gaugeRotation = gaugeRotation,
             maxWidth = maxWidth,
-            maxHeight = maxHeight
+            maxHeight = maxHeight,
+            displayIndicators = displayIndicators,
+            negativeIndicatorColor = negativeIndicatorColor,
+            positiveIndicatorColor = positiveIndicatorColor,
+            indicatorSize = indicatorSize,
+            indicatorPadding = indicatorPadding
         )
 
         DrawPointer(
@@ -149,38 +160,98 @@ private fun DrawNumbers(
     gaugeRotation: Float,
     numberPadding: Dp,
     maxWidth: Dp,
-    maxHeight: Dp
+    maxHeight: Dp,
+    displayIndicators: Boolean,
+    negativeIndicatorColor: Color,
+    positiveIndicatorColor: Color,
+    indicatorSize: TextUnit,
+    indicatorPadding: Dp
 ) {
     for (currentValue in startValue..endValue step showNumberEvery) {
+        val angle = getAngleFromValue(
+            value = currentValue.toFloat(),
+            degreesPerStep = degreesPerStep,
+            degrees = degrees,
+            startValue = startValue
+        )
+
         BasicText(
             text = currentValue.absoluteValue.toString(),
             style = TextStyle(
                 color = if (currentValue <= 0) negativeNumberColor else numberColor,
                 fontSize = numberSize
             ),
-            modifier = Modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
+            modifier = Modifier.layoutTextAtAngle(
+                angle = angle,
+                padding = bigLineLength + numberPadding,
+                gaugeRotation = gaugeRotation,
+                maxWidth = maxWidth,
+                maxHeight = maxHeight
+            )
+        )
+    }
 
-                val angle = getAngleFromValue(
-                    value = currentValue.toFloat(),
+    if(displayIndicators) {
+        BasicText(
+            text = "-",
+            style = TextStyle(
+                color = negativeIndicatorColor,
+                fontSize = indicatorSize
+            ),
+            modifier = Modifier.layoutTextAtAngle(
+                angle = getAngleFromValue(
+                    value = startValue.toFloat() - showNumberEvery/2f,
                     degreesPerStep = degreesPerStep,
                     degrees = degrees,
                     startValue = startValue
-                )
-                val a = (angle - gaugeRotation) * Math.PI / 180
-                val radius = maxOf(maxWidth, maxHeight).toPx() / 2f -
-                        bigLineLength.toPx() -
-                        numberPadding.toPx() -
-                        placeable.measuredHeight / 2f
-
-                val x = maxWidth.toPx() / 2f - placeable.measuredWidth / 2f - cos(a) * radius
-                val y = maxHeight.toPx() / 2f - placeable.measuredHeight / 2f - sin(a) * radius
-
-                layout(placeable.width, placeable.height) {
-                    placeable.place(x.toInt(), y.toInt())
-                }
-            }
+                ),
+                padding = indicatorPadding,
+                gaugeRotation = gaugeRotation,
+                maxWidth = maxWidth,
+                maxHeight = maxHeight
+            )
         )
+
+        BasicText(
+            text = "+",
+            style = TextStyle(
+                color = positiveIndicatorColor,
+                fontSize = indicatorSize
+            ),
+            modifier = Modifier.layoutTextAtAngle(
+                angle = getAngleFromValue(
+                    value = endValue.toFloat() + showNumberEvery/2f,
+                    degreesPerStep = degreesPerStep,
+                    degrees = degrees,
+                    startValue = startValue
+                ),
+                padding = indicatorPadding,
+                gaugeRotation = gaugeRotation,
+                maxWidth = maxWidth,
+                maxHeight = maxHeight
+            )
+        )
+    }
+}
+
+private fun Modifier.layoutTextAtAngle(
+    angle: Float,
+    gaugeRotation: Float,
+    padding: Dp,
+    maxWidth: Dp,
+    maxHeight: Dp,
+): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val a = (angle - gaugeRotation) * Math.PI / 180
+    val radius = maxOf(maxWidth, maxHeight).toPx() / 2f -
+            padding.toPx() -
+            placeable.measuredHeight / 2f
+
+    val x = maxWidth.toPx() / 2f - placeable.measuredWidth / 2f - cos(a) * radius
+    val y = maxHeight.toPx() / 2f - placeable.measuredHeight / 2f - sin(a) * radius
+
+    layout(placeable.width, placeable.height) {
+        placeable.place(x.toInt(), y.toInt())
     }
 }
 

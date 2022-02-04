@@ -15,7 +15,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.1.0-rc02"
+        kotlinCompilerExtensionVersion = "1.1.0-rc03"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -33,14 +33,16 @@ android {
 }
 
 dependencies {
-    api(project(":view"))
     val composeUiVersion = "1.1.0-rc01"
-    api("androidx.compose.ui:ui:$composeUiVersion")
-
+    implementation("androidx.compose.ui:ui:$composeUiVersion")
     implementation("androidx.compose.foundation:foundation:1.1.0-rc03")
-    implementation("androidx.compose.ui:ui-tooling:$composeUiVersion")
-    implementation("androidx.savedstate:savedstate-ktx:1.1.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07")
+
+    // following dependencies needed for preview
+    implementation("androidx.compose.ui:ui-tooling-preview:$composeUiVersion")
+    debugImplementation("androidx.compose.ui:ui-tooling:$composeUiVersion")
+    debugImplementation("androidx.savedstate:savedstate-ktx:1.1.0")
+    debugImplementation("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07")
+    debugImplementation("androidx.core:core-ktx:1.7.0")
 }
 
 afterEvaluate {

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -42,6 +43,13 @@ private fun GaugePreview() {
     )
 }
 
+@Immutable
+data class LineStyle(
+    val length: Dp,
+    val strokeWidth: Dp,
+    val color: Color
+)
+
 @Composable
 fun Gauge(
     value: Float,
@@ -50,36 +58,49 @@ fun Gauge(
 
     modifier: Modifier = Modifier,
 
-    bigLineLength: Dp = 32.dp,
-    mediumLineLength: Dp = 24.dp,
-    smallLineLength: Dp = 16.dp,
-
     smallLineEvery: Int = 1,
     mediumLineEvery: Int = 5,
     bigLineEvery: Int = 10,
-
     showNumberEvery: Int = 10,
+
+    bigLineStyle: LineStyle = LineStyle(
+        length = 32.dp,
+        strokeWidth = 4.dp,
+        color = Color.DarkGray
+    ),
+    negativeBigLineStyle: LineStyle = bigLineStyle.copy(
+        color = Color.Blue
+    ),
+
+    mediumLineStyle: LineStyle = LineStyle(
+        length = 24.dp,
+        strokeWidth = 3.dp,
+        color = Color.DarkGray
+    ),
+    negativeMediumLineStyle: LineStyle = mediumLineStyle.copy(
+        color = Color.Blue
+    ),
+
+    smallLineStyle: LineStyle = LineStyle(
+        length = 16.dp,
+        strokeWidth = 2.dp,
+        color = Color.DarkGray
+    ),
+    negativeSmallLineStyle: LineStyle = smallLineStyle.copy(
+        color = Color.Blue
+    ),
+
     degrees: Int = 270,
     gaugeRotation: Float = -90f,
 
-    smallLineStrokeWidth: Dp = 2.dp,
-    mediumLineStrokeWidth: Dp = 3.dp,
-    bigLineStrokeWidth: Dp = 4.dp,
-
     numberSize: TextUnit = 24.sp,
-    numberPadding: Dp = bigLineLength / 4f,
+    numberPadding: Dp = bigLineStyle.length / 4f,
 
     pointerColor: Color = Color.Red,
 
     numberColor: Color = Color.Black,
-    smallLineColor: Color = Color.DarkGray,
-    mediumLineColor: Color = Color.DarkGray,
-    bigLineColor: Color = Color.DarkGray,
 
     negativeNumberColor: Color = Color.Blue,
-    negativeSmallLineColor: Color = Color.Blue,
-    negativeMediumLineColor: Color = Color.Blue,
-    negativeBigLineColor: Color = Color.Blue,
 
     displayIndicators: Boolean = startValue < 0,
     negativeIndicatorColor: Color = Color.Black,
@@ -96,22 +117,16 @@ fun Gauge(
             startValue = startValue,
             endValue = endValue,
             smallLineEvery = smallLineEvery,
+            mediumLineEvery = mediumLineEvery,
+            bigLineEvery = bigLineEvery,
+            smallLineStyle = smallLineStyle,
+            negativeSmallLineStyle = negativeSmallLineStyle,
+            mediumLineStyle = mediumLineStyle,
+            negativeMediumLineStyle = negativeMediumLineStyle,
+            bigLineStyle = bigLineStyle,
+            negativeBigLineStyle = negativeBigLineStyle,
             gaugeRotation = gaugeRotation,
             degrees = degrees,
-            bigLineEvery = bigLineEvery,
-            mediumLineEvery = mediumLineEvery,
-            negativeBigLineColor = negativeBigLineColor,
-            bigLineColor = bigLineColor,
-            negativeMediumLineColor = negativeMediumLineColor,
-            mediumLineColor = mediumLineColor,
-            negativeSmallLineColor = negativeSmallLineColor,
-            smallLineColor = smallLineColor,
-            bigLineLength = bigLineLength,
-            mediumLineLength = mediumLineLength,
-            smallLineLength = smallLineLength,
-            bigLineStrokeWidth = bigLineStrokeWidth,
-            mediumLineStrokeWidth = mediumLineStrokeWidth,
-            smallLineStrokeWidth = smallLineStrokeWidth
         )
 
         DrawNumbers(
@@ -124,7 +139,7 @@ fun Gauge(
             numberPadding = numberPadding,
             degreesPerStep = degreesPerStep,
             degrees = degrees,
-            bigLineLength = bigLineLength,
+            bigLineLength = bigLineStyle.length,
             gaugeRotation = gaugeRotation,
             maxWidth = maxWidth,
             maxHeight = maxHeight,
@@ -137,7 +152,7 @@ fun Gauge(
 
         DrawPointer(
             degreesPerStep = degreesPerStep,
-            mediumLineLength = mediumLineLength,
+            mediumLineLength = mediumLineStyle.length,
             value = value,
             pointerColor = pointerColor,
             startValue = startValue,
@@ -261,22 +276,16 @@ private fun DrawLines(
     startValue: Int,
     endValue: Int,
     smallLineEvery: Int,
+    mediumLineEvery: Int,
+    bigLineEvery: Int,
     gaugeRotation: Float,
     degrees: Int,
-    bigLineEvery: Int,
-    mediumLineEvery: Int,
-    negativeBigLineColor: Color,
-    bigLineColor: Color,
-    negativeMediumLineColor: Color,
-    mediumLineColor: Color,
-    negativeSmallLineColor: Color,
-    smallLineColor: Color,
-    bigLineLength: Dp,
-    mediumLineLength: Dp,
-    smallLineLength: Dp,
-    bigLineStrokeWidth: Dp,
-    mediumLineStrokeWidth: Dp,
-    smallLineStrokeWidth: Dp
+    smallLineStyle: LineStyle,
+    negativeSmallLineStyle: LineStyle,
+    mediumLineStyle: LineStyle,
+    negativeMediumLineStyle: LineStyle,
+    bigLineStyle: LineStyle,
+    negativeBigLineStyle: LineStyle
 ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         for (value in startValue..endValue step smallLineEvery) {
@@ -287,23 +296,13 @@ private fun DrawLines(
                 startValue = startValue
             )
 
-            val lineColor = when {
-                value % bigLineEvery == 0 && value <= 0 -> negativeBigLineColor
-                value % bigLineEvery == 0 -> bigLineColor
-                value % mediumLineEvery == 0 && value <= 0 -> negativeMediumLineColor
-                value % mediumLineEvery == 0 -> mediumLineColor
-                value <= 0 -> negativeSmallLineColor
-                else -> smallLineColor
-            }
-            val lineLength = when {
-                value % bigLineEvery == 0 -> bigLineLength.toPx()
-                value % mediumLineEvery == 0 -> mediumLineLength.toPx()
-                else -> smallLineLength.toPx()
-            }
-            val strokeWidth = when {
-                value % bigLineEvery == 0 -> bigLineStrokeWidth.toPx()
-                value % mediumLineEvery == 0 -> mediumLineStrokeWidth.toPx()
-                else -> smallLineStrokeWidth.toPx()
+            val lineStyle = when {
+                value % bigLineEvery == 0 && value <= 0 -> negativeBigLineStyle
+                value % bigLineEvery == 0 -> bigLineStyle
+                value % mediumLineEvery == 0 && value <= 0 -> negativeMediumLineStyle
+                value % mediumLineEvery == 0 -> mediumLineStyle
+                value <= 0 -> negativeSmallLineStyle
+                else -> smallLineStyle
             }
             val pivot = center
 
@@ -311,10 +310,10 @@ private fun DrawLines(
                 rotate(clampDegrees(gaugeRotation + angle), pivot)
             }) {
                 drawLine(
-                    color = lineColor,
-                    start = Offset(size.width - lineLength, pivot.y),
+                    color = lineStyle.color,
+                    start = Offset(size.width - lineStyle.length.toPx(), pivot.y),
                     end = Offset(size.width, pivot.y),
-                    strokeWidth = strokeWidth
+                    strokeWidth = lineStyle.strokeWidth.toPx()
                 )
             }
         }

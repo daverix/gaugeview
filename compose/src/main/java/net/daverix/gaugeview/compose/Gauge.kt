@@ -1,6 +1,7 @@
 package net.daverix.gaugeview.compose
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,7 +20,6 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.absoluteValue
@@ -92,21 +92,39 @@ fun Gauge(
 
     degrees: Int = 270,
     gaugeRotation: Float = -90f,
-
-    numberSize: TextUnit = 24.sp,
-    numberPadding: Dp = bigLineStyle.length / 4f,
-
     pointerColor: Color = Color.Red,
 
-    numberColor: Color = Color.Black,
-
-    negativeNumberColor: Color = Color.Blue,
-
-    displayIndicators: Boolean = startValue < 0,
-    negativeIndicatorColor: Color = Color.Black,
-    positiveIndicatorColor: Color = Color.Black,
-    indicatorSize: TextUnit = numberSize,
-    indicatorPadding: Dp = 4.dp
+    indicatorPadding: Dp = 4.dp,
+    negativeIndicatorAtValue: Float = startValue - showNumberEvery/2f,
+    negativeIndicator: (@Composable () -> Unit)? = {
+        BasicText(
+            text = "-",
+            style = TextStyle(
+                color = Color.DarkGray,
+                fontSize = 24.sp
+            ),
+        )
+    },
+    positiveIndicatorAtValue: Float = endValue + showNumberEvery/2f,
+    positiveIndicator: (@Composable () -> Unit)? = {
+        BasicText(
+            text = "+",
+            style = TextStyle(
+                color = Color.DarkGray,
+                fontSize = 24.sp
+            ),
+        )
+    },
+    numberPadding: Dp = bigLineStyle.length * 1.25f,
+    number: @Composable (value: Int) -> Unit = { currentValue ->
+        BasicText(
+            text = currentValue.absoluteValue.toString(),
+            style = TextStyle(
+                color = if (currentValue <= 0) Color.Blue else Color.Black,
+                fontSize = 24.sp
+            )
+        )
+    }
 ) {
     val values = (endValue - startValue) / 2
     val degreesPerStep = (degrees / 2f) / values
@@ -133,21 +151,18 @@ fun Gauge(
             startValue = startValue,
             endValue = endValue,
             showNumberEvery = showNumberEvery,
-            negativeNumberColor = negativeNumberColor,
-            numberColor = numberColor,
-            numberSize = numberSize,
-            numberPadding = numberPadding,
             degreesPerStep = degreesPerStep,
             degrees = degrees,
-            bigLineLength = bigLineStyle.length,
             gaugeRotation = gaugeRotation,
             maxWidth = maxWidth,
             maxHeight = maxHeight,
-            displayIndicators = displayIndicators,
-            negativeIndicatorColor = negativeIndicatorColor,
-            positiveIndicatorColor = positiveIndicatorColor,
-            indicatorSize = indicatorSize,
-            indicatorPadding = indicatorPadding
+            numberPadding = numberPadding,
+            number = number,
+            indicatorPadding = indicatorPadding,
+            negativeIndicatorAtValue = negativeIndicatorAtValue,
+            negativeIndicator = negativeIndicator,
+            positiveIndicatorAtValue = positiveIndicatorAtValue,
+            positiveIndicator = positiveIndicator
         )
 
         DrawPointer(
@@ -166,21 +181,18 @@ private fun DrawNumbers(
     startValue: Int,
     endValue: Int,
     showNumberEvery: Int,
-    negativeNumberColor: Color,
-    numberColor: Color,
-    numberSize: TextUnit,
     degreesPerStep: Float,
     degrees: Int,
-    bigLineLength: Dp,
     gaugeRotation: Float,
     numberPadding: Dp,
     maxWidth: Dp,
     maxHeight: Dp,
-    displayIndicators: Boolean,
-    negativeIndicatorColor: Color,
-    positiveIndicatorColor: Color,
-    indicatorSize: TextUnit,
-    indicatorPadding: Dp
+    indicatorPadding: Dp,
+    number: @Composable (value: Int) -> Unit,
+    negativeIndicatorAtValue: Float,
+    negativeIndicator: @Composable (() -> Unit)?,
+    positiveIndicatorAtValue: Float,
+    positiveIndicator: @Composable (() -> Unit)?
 ) {
     for (currentValue in startValue..endValue step showNumberEvery) {
         val angle = getAngleFromValue(
@@ -190,32 +202,24 @@ private fun DrawNumbers(
             startValue = startValue
         )
 
-        BasicText(
-            text = currentValue.absoluteValue.toString(),
-            style = TextStyle(
-                color = if (currentValue <= 0) negativeNumberColor else numberColor,
-                fontSize = numberSize
-            ),
+        Box(
             modifier = Modifier.layoutTextAtAngle(
                 angle = angle,
-                padding = bigLineLength + numberPadding,
+                padding = numberPadding,
                 gaugeRotation = gaugeRotation,
                 maxWidth = maxWidth,
                 maxHeight = maxHeight
             )
-        )
+        ) {
+            number(currentValue)
+        }
     }
 
-    if(displayIndicators) {
-        BasicText(
-            text = "-",
-            style = TextStyle(
-                color = negativeIndicatorColor,
-                fontSize = indicatorSize
-            ),
+    negativeIndicator?.let { content ->
+        Box(
             modifier = Modifier.layoutTextAtAngle(
                 angle = getAngleFromValue(
-                    value = startValue.toFloat() - showNumberEvery/2f,
+                    value = negativeIndicatorAtValue,
                     degreesPerStep = degreesPerStep,
                     degrees = degrees,
                     startValue = startValue
@@ -225,17 +229,16 @@ private fun DrawNumbers(
                 maxWidth = maxWidth,
                 maxHeight = maxHeight
             )
-        )
+        ) {
+            content()
+        }
+    }
 
-        BasicText(
-            text = "+",
-            style = TextStyle(
-                color = positiveIndicatorColor,
-                fontSize = indicatorSize
-            ),
+    positiveIndicator?.let { content ->
+        Box(
             modifier = Modifier.layoutTextAtAngle(
                 angle = getAngleFromValue(
-                    value = endValue.toFloat() + showNumberEvery/2f,
+                    value = positiveIndicatorAtValue,
                     degreesPerStep = degreesPerStep,
                     degrees = degrees,
                     startValue = startValue
@@ -245,7 +248,9 @@ private fun DrawNumbers(
                 maxWidth = maxWidth,
                 maxHeight = maxHeight
             )
-        )
+        ) {
+            content()
+        }
     }
 }
 

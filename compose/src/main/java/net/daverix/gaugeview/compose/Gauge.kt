@@ -92,8 +92,6 @@ fun Gauge(
 
     degrees: Int = 270,
     gaugeRotation: Float = -90f,
-    pointerColor: Color = Color.Red,
-
     indicatorPadding: Dp = 4.dp,
     negativeIndicatorAtValue: Float = startValue - showNumberEvery/2f,
     negativeIndicator: (@Composable () -> Unit)? = {
@@ -123,6 +121,13 @@ fun Gauge(
                 color = if (currentValue <= 0) Color.Blue else Color.Black,
                 fontSize = 24.sp
             )
+        )
+    },
+    pointer: @Composable (angle: Float) -> Unit = { angle ->
+        GaugePointer(
+            angle = angle,
+            paddingTop = mediumLineStyle.length,
+            color = Color.Red
         )
     }
 ) {
@@ -165,14 +170,13 @@ fun Gauge(
             positiveIndicator = positiveIndicator
         )
 
-        DrawPointer(
-            degreesPerStep = degreesPerStep,
-            mediumLineLength = mediumLineStyle.length,
+        val angle = getAngleFromValue(
             value = value,
-            pointerColor = pointerColor,
-            startValue = startValue,
-            degrees = degrees
+            degreesPerStep = degreesPerStep,
+            degrees = degrees,
+            startValue = startValue
         )
+        pointer(angle)
     }
 }
 
@@ -326,19 +330,16 @@ private fun DrawLines(
 }
 
 @Composable
-private fun DrawPointer(
-    degreesPerStep: Float,
-    mediumLineLength: Dp,
-    value: Float,
-    pointerColor: Color,
-    degrees: Int,
-    startValue: Int
+fun GaugePointer(
+    paddingTop: Dp,
+    color: Color,
+    angle: Float
 ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         val pointerHeight = maxOf(size.height, size.width)
         val pointerRadiusCenter = 16.dp.toPx()
         val pointerRadiusTop = 2.dp.toPx()
-        val pointerTop = pointerHeight / 2 - mediumLineLength.toPx() - 4.dp.toPx()
+        val pointerTop = pointerHeight / 2 - paddingTop.toPx() - 4.dp.toPx()
         val pointerRadiusBottom = 8.dp.toPx()
         val pointerBottom = pointerHeight / 4
 
@@ -364,13 +365,6 @@ private fun DrawPointer(
             op(pointerMiddle, pointer, PathOperation.Union)
         }
 
-        val angle = getAngleFromValue(
-            value = value,
-            degreesPerStep = degreesPerStep,
-            degrees = degrees,
-            startValue = startValue
-        )
-
         val pivot = center
         val middleDotSize = 16.dp.toPx()
 
@@ -378,7 +372,7 @@ private fun DrawPointer(
             rotate(angle, pivot)
             translate(pivot.x, pivot.y)
         }) {
-            drawPath(fullPointer, color = pointerColor)
+            drawPath(fullPointer, color = color)
 
             drawOval(
                 color = Color.White,
